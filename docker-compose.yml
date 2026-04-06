@@ -1,0 +1,54 @@
+
+services:
+
+  # ── Users Microservice ──────────────────────────────────────
+  users:
+    build:
+      context: .
+      args:
+        APP_NAME: users
+    environment:
+      - NODE_ENV=development
+    networks:
+      - internal
+    restart: unless-stopped
+    # No ports — TCP only, invisible from outside
+
+  # ── Orders Microservice ─────────────────────────────────────
+  orders:
+    build:
+      context: .
+      args:
+        APP_NAME: orders
+    environment:
+      - NODE_ENV=development
+    networks:
+      - internal
+    restart: unless-stopped
+    # No ports — TCP only, invisible from outside
+
+  # ── API Gateway (only public-facing service) ────────────────
+  api-gateway:
+    build:
+      context: .
+      args:
+        APP_NAME: api-gateway
+    ports:
+      - '3000:3000'         # only exposed port to your machine
+    environment:
+      - NODE_ENV=development
+      - USERS_HOST=users    # resolves to users container via Docker DNS
+      - USERS_PORT=3001
+      - ORDERS_HOST=orders
+      - ORDERS_PORT=3002
+    depends_on:
+      - users
+      - orders
+    networks:
+      - internal
+    restart: unless-stopped
+
+# ── Shared private network ──────────────────────────────────
+networks:
+  internal:
+    driver: bridge

@@ -1,10 +1,20 @@
 import { Module } from '@nestjs/common';
-import { ApiGatewayController } from './app.controller';
-import { ApiGatewayService } from './api-gateway.service';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { AppController } from './app.controller';
 
 @Module({
-  imports: [],
-  controllers: [ApiGatewayController],
-  providers: [ApiGatewayService],
+  imports: [
+	ClientsModule.register([
+	  {
+		name: 'USERS_SERVICE', // Injection token — use this in controllers
+		transport: Transport.TCP,
+		options: {
+		  host: 'users', // Docker service name (or 'localhost' locally)
+		  port: 3001,
+		},
+	  },
+	]),
+  ],
+  controllers: [AppController],
 })
-export class ApiGatewayModule {}
+export class AppModule {}
