@@ -1,7 +1,6 @@
+version: '3.8'
 
 services:
-
-  # ── Users Microservice ──────────────────────────────────────
   users:
     build:
       context: .
@@ -12,9 +11,18 @@ services:
     networks:
       - internal
     restart: unless-stopped
-    # No ports — TCP only, invisible from outside
 
-  # ── Orders Microservice ─────────────────────────────────────
+  notifications:
+    build:
+      context: .
+      args:
+        APP_NAME: notifications
+    environment:
+      - NODE_ENV=development
+    networks:
+      - internal
+    restart: unless-stopped
+
   orders:
     build:
       context: .
@@ -22,33 +30,36 @@ services:
         APP_NAME: orders
     environment:
       - NODE_ENV=development
+    depends_on:
+      - users
+      - notifications
     networks:
       - internal
     restart: unless-stopped
-    # No ports — TCP only, invisible from outside
 
-  # ── API Gateway (only public-facing service) ────────────────
   api-gateway:
     build:
       context: .
       args:
         APP_NAME: api-gateway
     ports:
-      - '3000:3000'         # only exposed port to your machine
+      - '3000:3000'
     environment:
       - NODE_ENV=development
-      - USERS_HOST=users    # resolves to users container via Docker DNS
+      - USERS_HOST=users
       - USERS_PORT=3001
       - ORDERS_HOST=orders
       - ORDERS_PORT=3002
+      - NOTIFICATIONS_HOST=notifications
+      - NOTIFICATIONS_PORT=3003
     depends_on:
       - users
       - orders
+      - notifications
     networks:
       - internal
     restart: unless-stopped
 
-# ── Shared private network ──────────────────────────────────
 networks:
   internal:
     driver: bridge

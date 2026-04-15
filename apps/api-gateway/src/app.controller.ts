@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
+import { CreateUserDto, PATTERNS } from 'libs/shared/src';
+import { GetUserDto } from 'libs/shared/src/dto/get-user.dto';
 
 
 @Controller('users')
@@ -49,16 +51,18 @@ private toHttpException(err: unknown): HttpException {
 async getUser(@Param('id') id: string) {
 // .send() = request/response (awaits a reply)
 // firstValueFrom() converts the Observable to a Promise
+const payload: GetUserDto = { id: Number(id) };
+
 return firstValueFrom(
-	this.usersClient.send('get_user', { id: Number(id) }).pipe(
+	this.usersClient.send(PATTERNS.USERS.GET_ONE, payload).pipe(
 		catchError((err) => throwError(() => this.toHttpException(err))),
 	),
 );
 }
 @Post()
-async createUser(@Body() body: { name: string; email: string }) {
+async createUser(@Body() body: CreateUserDto) {
 return firstValueFrom(
-this.usersClient.send('create_user', body)
+this.usersClient.send(PATTERNS.USERS.CREATE, body)
 );
 }
 }

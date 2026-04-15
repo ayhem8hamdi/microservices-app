@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { of } from 'rxjs';
 
 import { AppController } from './app.controller';
+import { PATTERNS } from 'libs/shared/src';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -35,7 +36,7 @@ describe('AppController', () => {
         email: 'john@example.com',
       });
 
-      expect(usersClient.send).toHaveBeenCalledWith('get_user', { id: 1 });
+      expect(usersClient.send).toHaveBeenCalledWith(PATTERNS.USERS.GET_ONE, { id: 1 });
     });
   });
 });
