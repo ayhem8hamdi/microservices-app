@@ -19,8 +19,10 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "baseUrl": "./",
-    "paths": {},
-    "ignoreDeprecations": "6.0"
+    "paths": {
+      "libs/*": ["./libs/*"],
+      "apps/*": ["./apps/*"]
+    },
+    "ignoreDeprecations": "5.0"
   }
 }

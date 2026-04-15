@@ -8,13 +8,17 @@ import {
   GetUserDto,
   OrderPlacedEvent,
   PATTERNS,
-} from 'libs/shared/src';
+} from '../../../libs/shared/src';
 @Injectable()
 export class OrdersService {
   constructor(
     @Inject('USERS_SERVICE') private usersClient: ClientProxy,
     @Inject('NOTIFICATIONS_SERVICE') private notifClient: ClientProxy,
   ) {}
+
+  getHello(): string {
+    return 'Orders service is running';
+  }
 
   async placeOrder(data: CreateOrderDto) {
     // 1. Validate user (SYNC CALL)

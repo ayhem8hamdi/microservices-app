@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
-import { OrderPlacedEvent, PATTERNS } from 'libs/shared/src';
+import { OrderPlacedEvent, PATTERNS } from '../../../libs/shared/src';
 @Controller()
 export class NotificationsController {
   // @EventPattern — NOT @MessagePattern

@@ -13,6 +13,14 @@ import { AppController } from './app.controller';
 		  port: 3001,
 		},
 	  },
+	  {
+		name: 'ORDERS_SERVICE',
+		transport: Transport.TCP,
+		options: {
+		  host: 'orders',
+		  port: 3002,
+		},
+	  },
 	]),
   ],
   controllers: [AppController],

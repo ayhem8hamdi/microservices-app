@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { UsersService } from './users.service';
-import { CreateUserDto, GetUserDto, PATTERNS } from 'libs/shared/src';
+import { CreateUserDto, GetUserDto, PATTERNS } from '../../../libs/shared/src';
 @Controller()
 export class UsersController {
 constructor(private readonly usersService: UsersService) {}

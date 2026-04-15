@@ -10,14 +10,19 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
-import { CreateUserDto, PATTERNS } from 'libs/shared/src';
-import { GetUserDto } from 'libs/shared/src/dto/get-user.dto';
+import {
+	CreateOrderDto,
+	CreateUserDto,
+	GetUserDto,
+	PATTERNS,
+} from '../../../libs/shared/src';
 
 
-@Controller('users')
+@Controller()
 export class AppController {
 constructor(
 @Inject('USERS_SERVICE') private readonly usersClient: ClientProxy,
+@Inject('ORDERS_SERVICE') private readonly ordersClient: ClientProxy,
 ) {}
 
 private toHttpException(err: unknown): HttpException {
@@ -25,21 +30,28 @@ private toHttpException(err: unknown): HttpException {
 	const defaultStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
 	if (typeof err === 'string') {
-		return new HttpException(err, defaultStatus);
+		const inferredStatus = /not found/i.test(err)
+			? HttpStatus.NOT_FOUND
+			: defaultStatus;
+		return new HttpException(err, inferredStatus);
 	}
 
 	if (err && typeof err === 'object') {
+		const message =
+			'message' in err
+				? String((err as { message?: unknown }).message ?? defaultMessage)
+				: defaultMessage;
+
+		const inferredStatusFromMessage = /not found/i.test(message)
+			? HttpStatus.NOT_FOUND
+			: defaultStatus;
+
 		const statusCode =
 			'statusCode' in err && typeof (err as { statusCode?: unknown }).statusCode === 'number'
 				? (err as { statusCode: number }).statusCode
 				: 'status' in err && typeof (err as { status?: unknown }).status === 'number'
 					? (err as { status: number }).status
-					: defaultStatus;
-
-		const message =
-			'message' in err
-				? String((err as { message?: unknown }).message ?? defaultMessage)
-				: defaultMessage;
+					: inferredStatusFromMessage;
 
 		return new HttpException(message, statusCode);
 	}
@@ -47,7 +59,7 @@ private toHttpException(err: unknown): HttpException {
 	return new HttpException(defaultMessage, defaultStatus);
 }
 
-@Get(':id')
+@Get('users/:id')
 async getUser(@Param('id') id: string) {
 // .send() = request/response (awaits a reply)
 // firstValueFrom() converts the Observable to a Promise
@@ -59,10 +71,19 @@ return firstValueFrom(
 	),
 );
 }
-@Post()
+@Post('users')
 async createUser(@Body() body: CreateUserDto) {
 return firstValueFrom(
 this.usersClient.send(PATTERNS.USERS.CREATE, body)
+);
+}
+
+@Post('orders')
+async createOrder(@Body() body: CreateOrderDto) {
+return firstValueFrom(
+this.ordersClient.send(PATTERNS.ORDERS.PLACE, body).pipe(
+	catchError((err) => throwError(() => this.toHttpException(err))),
+),
 );
 }
 }
