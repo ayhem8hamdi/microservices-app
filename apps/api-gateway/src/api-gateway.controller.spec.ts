@@ -1,22 +1,41 @@
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ApiGatewayController } from './app.controller';
-import { ApiGatewayService } from './api-gateway.service';
+import { of } from 'rxjs';
 
-describe('ApiGatewayController', () => {
-  let apiGatewayController: ApiGatewayController;
+import { AppController } from './app.controller';
+
+describe('AppController', () => {
+  let appController: AppController;
+  const usersClient = {
+    send: jest.fn(),
+  };
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
-      controllers: [ApiGatewayController],
-      providers: [ApiGatewayService],
+      controllers: [AppController],
+      providers: [
+        {
+          provide: 'USERS_SERVICE',
+          useValue: usersClient,
+        },
+      ],
     }).compile();
 
-    apiGatewayController = app.get<ApiGatewayController>(ApiGatewayController);
+    appController = app.get<AppController>(AppController);
+    usersClient.send.mockReset();
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(apiGatewayController.getHello()).toBe('Hello World!');
+  describe('getUser', () => {
+    it('should request a user by id from the users service', async () => {
+      usersClient.send.mockReturnValue(of({ id: 1, name: 'John', email: 'john@example.com' }));
+
+      await expect(appController.getUser('1')).resolves.toEqual({
+        id: 1,
+        name: 'John',
+        email: 'john@example.com',
+      });
+
+      expect(usersClient.send).toHaveBeenCalledWith('get_user', { id: 1 });
     });
   });
 });
