@@ -1,62 +1,114 @@
 services:
+  # ── Databases (one per service) ──────────────────────────────────────────
+  users-db:
+    image: postgres:15-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: users_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${USERS_DB_PASSWORD}
+    volumes:
+      - users-db-data:/var/lib/postgresql/data
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  orders-db:
+    image: postgres:15-alpine
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: orders_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${ORDERS_DB_PASSWORD}
+    volumes:
+      - orders-db-data:/var/lib/postgresql/data
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  notifications-db:
+    image: postgres:15-alpine
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_DB: notifications_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${NOTIFICATIONS_DB_PASSWORD}
+    volumes:
+      - notifications-db-data:/var/lib/postgresql/data
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Microservices ────────────────────────────────────────────────────────
   users:
-    build:
+    build: 
       context: .
-      args:
+      args: 
         APP_NAME: users
     environment:
-      - NODE_ENV=development
-    networks:
-      - internal
-    restart: unless-stopped
-
-  notifications:
-    build:
-      context: .
-      args:
-        APP_NAME: notifications
-    environment:
-      - NODE_ENV=development
-    networks:
-      - internal
-    restart: unless-stopped
+      DATABASE_URL: ${USERS_DATABASE_URL}
+    depends_on:
+      users-db:
+        condition: service_healthy
+    networks: [internal]
 
   orders:
-    build:
+    build: 
       context: .
-      args:
+      args: 
         APP_NAME: orders
     environment:
-      - NODE_ENV=development
+      DATABASE_URL: ${ORDERS_DATABASE_URL}
     depends_on:
-      - users
-      - notifications
-    networks:
-      - internal
-    restart: unless-stopped
+      orders-db:
+        condition: service_healthy
+      users:
+        condition: service_started
+      notifications:
+        condition: service_started
+    networks: [internal]
+
+  notifications:
+    build: 
+      context: .
+      args: 
+        APP_NAME: notifications
+    environment:
+      DATABASE_URL: ${NOTIFICATIONS_DATABASE_URL}
+    depends_on:
+      notifications-db:
+        condition: service_healthy
+    networks: [internal]
 
   api-gateway:
-    build:
+    build: 
       context: .
-      args:
+      args: 
         APP_NAME: api-gateway
     ports:
       - '3000:3000'
-    environment:
-      - NODE_ENV=development
-      - USERS_HOST=users
-      - USERS_PORT=3001
-      - ORDERS_HOST=orders
-      - ORDERS_PORT=3002
-      - NOTIFICATIONS_HOST=notifications
-      - NOTIFICATIONS_PORT=3003
     depends_on:
       - users
       - orders
       - notifications
-    networks:
-      - internal
-    restart: unless-stopped
+    networks: [internal]
+
+volumes:
+  users-db-data:
+  orders-db-data:
+  notifications-db-data:
 
 networks:
   internal:

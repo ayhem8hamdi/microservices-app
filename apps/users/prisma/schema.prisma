@@ -1,0 +1,21 @@
+// apps/users/prisma/schema.prisma
+generator client {
+provider = "prisma-client-js"
+// CRITICAL: output must be unique per service
+// Without this, all services share one generated client and conflict
+output = "../../../node_modules/.prisma/users-client"
+}
+datasource db {
+provider = "postgresql"
+// Each service reads its own env variable
+url = env("USERS_DATABASE_URL")
+}
+model User {
+id Int @id @default(autoincrement())
+name String
+email String @unique
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+// Users owns its profile data
+// It does NOT have an orders relation — that lives in Orders DB
+}

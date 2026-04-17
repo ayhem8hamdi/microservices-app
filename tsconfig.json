@@ -19,10 +19,14 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
+    "baseUrl": ".",
     "paths": {
       "libs/*": ["./libs/*"],
-      "apps/*": ["./apps/*"]
+      "apps/*": ["./apps/*"],
+      "@prisma/users-client": ["./node_modules/.prisma/users-client"],
+      "@prisma/orders-client": ["./node_modules/.prisma/orders-client"],
+      "@prisma/notifications-client": ["./node_modules/.prisma/notifications-client"]
     },
-    "ignoreDeprecations": "5.0"
+    "ignoreDeprecations": "6.0"
   }
 }

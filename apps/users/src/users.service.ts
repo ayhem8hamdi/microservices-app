@@ -1,26 +1,36 @@
+// apps/users/src/users.service.ts
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { CreateUserDto } from '../../../libs/shared/src';
-// In-memory store for now — Prisma comes in Tutorial 3
-const users: any[] = [];
-let idCounter = 1;
+import { PrismaService } from './prisma/prisma.service';
+import { CreateUserDto } from 'libs/shared/src';
+
 @Injectable()
 export class UsersService {
-findOne(id: number) {
-  const user = users.find(u => u.id === id);
-
-  if (!user) {
-    throw new RpcException(`User ${id} not found`);
-  }
-
-  return user;
+constructor(private readonly prisma: PrismaService) {}
+async findOne(id: number) {
+const user = await this.prisma.user.findUnique({
+where: { id },
+});
+if (!user) {
+throw new RpcException({ statusCode: 404, message: `User ${id} not
+found` });
 }
-create(data: CreateUserDto) {
-const user = { id: idCounter++, ...data };
-users.push(user);
 return user;
 }
-findAll() {
-return users;
+async create(data: CreateUserDto) {
+// Check for duplicate email
+const existing = await this.prisma.user.findUnique({
+where: { email: data.email },
+});
+if (existing) {
+throw new RpcException({ statusCode: 409, message: `Email already
+registered` });
+}
+return this.prisma.user.create({ data });
+}
+async findAll() {
+return this.prisma.user.findMany({
+orderBy: { createdAt: 'desc' },
+});
 }
 }

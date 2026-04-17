@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
+import { PrismaService } from './prisma/prisma.service';
 @Module({
 imports: [
 ClientsModule.register([
@@ -21,6 +22,6 @@ options: { host: 'notifications', port: 3003 },
 ]),
 ],
 controllers: [OrdersController],
-providers: [OrdersService],
+providers: [OrdersService,PrismaService],
 })
 export class OrdersModule {}
