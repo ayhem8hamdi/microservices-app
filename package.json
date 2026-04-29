@@ -5,9 +5,17 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "imports": {
+    "#prisma/users-client": "./node_modules/.prisma/users-client/index.js",
+    "#prisma/orders-client": "./node_modules/.prisma/orders-client/index.js",
+    "#prisma/notifications-client": "./node_modules/.prisma/notifications-client/index.js"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
+    "prisma:migrate:create:users": "powershell -ExecutionPolicy Bypass -File ./scripts/prisma-create-migration.ps1 -Service users -Name init_users",
+    "prisma:migrate:create:orders": "powershell -ExecutionPolicy Bypass -File ./scripts/prisma-create-migration.ps1 -Service orders -Name init_orders",
+    "prisma:migrate:create:notifications": "powershell -ExecutionPolicy Bypass -File ./scripts/prisma-create-migration.ps1 -Service notifications -Name init_notifications",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -25,6 +33,9 @@
     "@nestjs/microservices": "^11.1.18",
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/client": "^6.19.3",
+    "amqp-connection-manager": "^5.0.0",
+    "amqplib": "^1.0.3",
+    "prisma": "^6.19.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
@@ -44,7 +55,6 @@
     "globals": "^16.0.0",
     "jest": "^30.0.0",
     "prettier": "^3.4.2",
-    "prisma": "^6.19.3",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
@@ -55,25 +65,16 @@
     "typescript-eslint": "^8.20.0"
   },
   "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
+    "moduleFileExtensions": ["js", "json", "ts"],
     "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
+    "collectCoverageFrom": ["**/*.(t|j)s"],
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/apps/",
-      "<rootDir>/libs/"
-    ],
+    "roots": ["<rootDir>/apps/", "<rootDir>/libs/"],
     "moduleNameMapper": {
       "^@app/shared(|/.*)$": "<rootDir>/libs/shared/src/$1"
     }

@@ -3,7 +3,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { firstValueFrom, catchError, throwError } from 'rxjs';
 import { PrismaService } from './prisma/prisma.service';
-import { CreateOrderDto, OrderPlacedEvent, PATTERNS } from 'libs/shared/src';
+import { CreateOrderDto, OrderPlacedEvent, PATTERNS } from '@app/shared';
 @Injectable()
 export class OrdersService {
 constructor(

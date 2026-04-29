@@ -5,7 +5,9 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/microservices-app/tsconfig.app.json"
+    "tsConfigPath": "apps/microservices-app/tsconfig.app.json",
+    "webpackConfigPath": "webpack.config.cjs"
+
   },
   "monorepo": true,
   "root": "apps/microservices-app",
@@ -16,16 +18,9 @@
       "entryFile": "main",
       "sourceRoot": "apps/api-gateway/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
-      }
-    },
-    "microservices-app": {
-      "type": "application",
-      "root": "apps/microservices-app",
-      "entryFile": "main",
-      "sourceRoot": "apps/microservices-app/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/microservices-app/tsconfig.app.json"
+        "tsConfigPath": "apps/api-gateway/tsconfig.app.json",
+        "webpackConfigPath": "webpack.config.cjs"
+
       }
     },
     "notifications": {
@@ -34,7 +29,9 @@
       "entryFile": "main",
       "sourceRoot": "apps/notifications/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/notifications/tsconfig.app.json"
+        "tsConfigPath": "apps/notifications/tsconfig.app.json",
+        "webpackConfigPath": "webpack.config.cjs"
+
       }
     },
     "orders": {
@@ -43,7 +40,19 @@
       "entryFile": "main",
       "sourceRoot": "apps/orders/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/orders/tsconfig.app.json"
+        "tsConfigPath": "apps/orders/tsconfig.app.json",
+        "webpackConfigPath": "webpack.config.cjs"
+
+      }
+    },
+    "users": {
+      "type": "application",
+      "root": "apps/users",
+      "entryFile": "main",
+      "sourceRoot": "apps/users/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/users/tsconfig.app.json",
+        "webpackConfigPath": "webpack.config.cjs"
       }
     },
     "shared": {
@@ -53,15 +62,6 @@
       "sourceRoot": "libs/shared/src",
       "compilerOptions": {
         "tsConfigPath": "libs/shared/tsconfig.lib.json"
-      }
-    },
-    "users": {
-      "type": "application",
-      "root": "apps/users",
-      "entryFile": "main",
-      "sourceRoot": "apps/users/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/users/tsconfig.app.json"
       }
     }
   }

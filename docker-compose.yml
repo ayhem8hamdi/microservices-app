@@ -2,8 +2,6 @@ services:
   # ── Databases (one per service) ──────────────────────────────────────────
   users-db:
     image: postgres:15-alpine
-    ports:
-      - "5433:5432"
     environment:
       POSTGRES_DB: users_db
       POSTGRES_USER: postgres
@@ -19,8 +17,6 @@ services:
 
   orders-db:
     image: postgres:15-alpine
-    ports:
-      - "5434:5432"
     environment:
       POSTGRES_DB: orders_db
       POSTGRES_USER: postgres
@@ -36,8 +32,6 @@ services:
 
   notifications-db:
     image: postgres:15-alpine
-    ports:
-      - "5435:5432"
     environment:
       POSTGRES_DB: notifications_db
       POSTGRES_USER: postgres
@@ -51,28 +45,67 @@ services:
       timeout: 5s
       retries: 5
 
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - '5050:80'
+    depends_on:
+      - users-db
+      - orders-db
+      - notifications-db
+    networks: [internal]
+
+  # ── Message Broker ───────────────────────────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    ports:
+      - '5672:5672'   # AMQP protocol — your services connect here
+      - '15672:15672' # Management UI — open in your browser
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks: [internal]
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # ── Microservices ────────────────────────────────────────────────────────
   users:
-    build: 
+    build:
       context: .
-      args: 
+      args:
         APP_NAME: users
     environment:
+      APP_NAME: users
       DATABASE_URL: ${USERS_DATABASE_URL}
+      RABBITMQ_URL: ${RABBITMQ_URL}
     depends_on:
       users-db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks: [internal]
 
   orders:
-    build: 
+    build:
       context: .
-      args: 
+      args:
         APP_NAME: orders
     environment:
+      APP_NAME: orders
       DATABASE_URL: ${ORDERS_DATABASE_URL}
+      RABBITMQ_URL: ${RABBITMQ_URL}
     depends_on:
       orders-db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
       users:
         condition: service_started
@@ -81,31 +114,44 @@ services:
     networks: [internal]
 
   notifications:
-    build: 
+    build:
       context: .
-      args: 
+      args:
         APP_NAME: notifications
     environment:
+      APP_NAME: notifications
       DATABASE_URL: ${NOTIFICATIONS_DATABASE_URL}
+      RABBITMQ_URL: ${RABBITMQ_URL}
     depends_on:
       notifications-db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks: [internal]
 
   api-gateway:
-    build: 
+    build:
       context: .
-      args: 
+      args:
         APP_NAME: api-gateway
     ports:
       - '3000:3000'
+    environment:
+      APP_NAME: api-gateway
+      RABBITMQ_URL: ${RABBITMQ_URL}
     depends_on:
-      - users
-      - orders
-      - notifications
+      rabbitmq:
+        condition: service_healthy
+      users:
+        condition: service_started
+      orders:
+        condition: service_started
+      notifications:
+        condition: service_started
     networks: [internal]
 
 volumes:
+  rabbitmq-data:
   users-db-data:
   orders-db-data:
   notifications-db-data:

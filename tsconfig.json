@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "resolvePackageJsonExports": true,
+    "module": "commonjs",           // was "nodenext"
     "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,
@@ -19,14 +17,13 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "baseUrl": ".",
     "paths": {
-      "libs/*": ["./libs/*"],
+      "@app/shared": ["./libs/shared/src/index.ts"],   // was "libs/*"
+      "@app/shared/*": ["./libs/shared/src/*"],
       "apps/*": ["./apps/*"],
       "@prisma/users-client": ["./node_modules/.prisma/users-client"],
       "@prisma/orders-client": ["./node_modules/.prisma/orders-client"],
       "@prisma/notifications-client": ["./node_modules/.prisma/notifications-client"]
-    },
-    "ignoreDeprecations": "6.0"
+    }
   }
 }

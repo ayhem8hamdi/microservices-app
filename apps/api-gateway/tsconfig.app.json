@@ -1,8 +1,9 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.json",  // inherits module/moduleResolution from root
   "compilerOptions": {
     "declaration": false,
     "outDir": "../../dist/apps/api-gateway"
+    // nothing else needed here — root tsconfig handles the rest
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]

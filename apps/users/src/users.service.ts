@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaService } from './prisma/prisma.service';
-import { CreateUserDto } from 'libs/shared/src';
+import { CreateUserDto }  from '@app/shared';
 
 @Injectable()
 export class UsersService {
