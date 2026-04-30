@@ -1,0 +1,24 @@
+// apps/analytics/prisma/schema.prisma 
+generator client { 
+  provider = "prisma-client-js"
+  output   = "../../../node_modules/.prisma/analytics-client" 
+} 
+ 
+datasource db { 
+  provider = "postgresql" 
+  url      = env("ANALYTICS_DATABASE_URL") 
+} 
+ 
+model AnalyticsEvent { 
+  id         Int      @id @default(autoincrement()) 
+  eventType  String 
+  userId     Int 
+  orderId    Int? 
+  value      Float    @default(0) 
+  payload    Json 
+  occurredAt DateTime @default(now()) 
+ 
+  @@index([eventType]) 
+  @@index([userId]) 
+  @@index([occurredAt]) 
+} 

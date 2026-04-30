@@ -4,6 +4,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { PrismaService } from './prisma/prisma.service';
+import { EXCHANGES } from '@app/shared/constants/patterns';
 
 
 @Module({
@@ -21,15 +22,16 @@ import { PrismaService } from './prisma/prisma.service';
       },
       {
         // Notifications switched to RabbitMQ — fire-and-forget events only
-        name: 'NOTIFICATIONS_SERVICE',
+        name: 'EVENT_BUS',  // it should be generic name because its not coupled directly with any service 
         transport: Transport.RMQ,
         options: {
           urls: [process.env.RABBITMQ_URL!],
-          queue: 'notifications_queue',
+          exchange: EXCHANGES.ORDERS.name,  //we will push to the exchange and he will complete the rest 
+          exchangeType: EXCHANGES.ORDERS.type, 
           queueOptions: {
             durable: true, // queue survives RabbitMQ restarts
           },
-          noAck: true, // manual acknowledgement — safer, explained below
+          noAck: true, // always should be true from the producer side we never check here here d
         },
       },
     ]),

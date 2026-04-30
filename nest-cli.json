@@ -7,11 +7,19 @@
     "webpack": true,
     "tsConfigPath": "apps/microservices-app/tsconfig.app.json",
     "webpackConfigPath": "webpack.config.cjs"
-
   },
   "monorepo": true,
   "root": "apps/microservices-app",
   "projects": {
+    "analytics": {
+      "type": "application",
+      "root": "apps/analytics",
+      "entryFile": "main",
+      "sourceRoot": "apps/analytics/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/analytics/tsconfig.app.json"
+      }
+    },
     "api-gateway": {
       "type": "application",
       "root": "apps/api-gateway",
@@ -20,7 +28,6 @@
       "compilerOptions": {
         "tsConfigPath": "apps/api-gateway/tsconfig.app.json",
         "webpackConfigPath": "webpack.config.cjs"
-
       }
     },
     "notifications": {
@@ -31,7 +38,6 @@
       "compilerOptions": {
         "tsConfigPath": "apps/notifications/tsconfig.app.json",
         "webpackConfigPath": "webpack.config.cjs"
-
       }
     },
     "orders": {
@@ -42,7 +48,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/orders/tsconfig.app.json",
         "webpackConfigPath": "webpack.config.cjs"
-
+      }
+    },
+    "shared": {
+      "type": "library",
+      "root": "libs/shared",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared/tsconfig.lib.json"
       }
     },
     "users": {
@@ -53,15 +67,6 @@
       "compilerOptions": {
         "tsConfigPath": "apps/users/tsconfig.app.json",
         "webpackConfigPath": "webpack.config.cjs"
-      }
-    },
-    "shared": {
-      "type": "library",
-      "root": "libs/shared",
-      "entryFile": "index",
-      "sourceRoot": "libs/shared/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/shared/tsconfig.lib.json"
       }
     }
   }

@@ -35,7 +35,7 @@ while [ $attempt -le $max_attempts ]; do
     fi
 done
 
-# Run migrations (DB already exists, created by postgres image itself)
+# Run migrations
 echo "🔄 Running database migrations..."
 case "$APP_NAME" in
     users)
@@ -49,6 +49,10 @@ case "$APP_NAME" in
     notifications)
         export NOTIFICATIONS_DATABASE_URL="$DATABASE_URL"
         npx prisma migrate deploy --schema=apps/notifications/prisma/schema.prisma
+        ;;
+    analytics)
+        export ANALYTICS_DATABASE_URL="$DATABASE_URL"
+        npx prisma migrate deploy --schema=apps/analytics/prisma/schema.prisma
         ;;
 esac
 echo "✅ Migrations completed"

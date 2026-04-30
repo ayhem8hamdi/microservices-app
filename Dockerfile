@@ -12,12 +12,14 @@ ARG APP_NAME
 RUN npx prisma generate --schema=apps/users/prisma/schema.prisma
 RUN npx prisma generate --schema=apps/orders/prisma/schema.prisma
 RUN npx prisma generate --schema=apps/notifications/prisma/schema.prisma
+RUN npx prisma generate --schema=apps/analytics/prisma/schema.prisma
 
-# ✅ ADD THIS BLOCK — create @prisma/* aliases BEFORE webpack runs
+# ✅ Create @prisma/* aliases BEFORE webpack runs
 RUN mkdir -p node_modules/@prisma && \
     cp -r node_modules/.prisma/users-client         node_modules/@prisma/users-client && \
     cp -r node_modules/.prisma/orders-client        node_modules/@prisma/orders-client && \
-    cp -r node_modules/.prisma/notifications-client node_modules/@prisma/notifications-client
+    cp -r node_modules/.prisma/notifications-client node_modules/@prisma/notifications-client && \
+    cp -r node_modules/.prisma/analytics-client     node_modules/@prisma/analytics-client
 
 RUN npm run build ${APP_NAME}
 
@@ -39,14 +41,16 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Recreate @prisma/* aliases as real directories (symlinks don't survive COPY)
 RUN mkdir -p node_modules/@prisma && \
-    cp -r node_modules/.prisma/users-client        node_modules/@prisma/users-client && \
-    cp -r node_modules/.prisma/orders-client       node_modules/@prisma/orders-client && \
-    cp -r node_modules/.prisma/notifications-client node_modules/@prisma/notifications-client
+    cp -r node_modules/.prisma/users-client         node_modules/@prisma/users-client && \
+    cp -r node_modules/.prisma/orders-client        node_modules/@prisma/orders-client && \
+    cp -r node_modules/.prisma/notifications-client node_modules/@prisma/notifications-client && \
+    cp -r node_modules/.prisma/analytics-client     node_modules/@prisma/analytics-client
 
 # Copy Prisma schemas and migrations used at runtime by the entrypoint
-COPY --from=builder /app/apps/users/prisma ./apps/users/prisma
-COPY --from=builder /app/apps/orders/prisma ./apps/orders/prisma
+COPY --from=builder /app/apps/users/prisma        ./apps/users/prisma
+COPY --from=builder /app/apps/orders/prisma       ./apps/orders/prisma
 COPY --from=builder /app/apps/notifications/prisma ./apps/notifications/prisma
+COPY --from=builder /app/apps/analytics/prisma    ./apps/analytics/prisma
 
 ARG APP_NAME
 ENV APP_NAME=${APP_NAME}

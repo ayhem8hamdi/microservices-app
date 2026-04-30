@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "commonjs",           // was "nodenext"
+    "module": "commonjs",
     "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,
@@ -18,12 +18,14 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@app/shared": ["./libs/shared/src/index.ts"],   // was "libs/*"
+      "@app/shared": ["./libs/shared/src/index.ts"],
       "@app/shared/*": ["./libs/shared/src/*"],
-      "apps/*": ["./apps/*"],
-      "@prisma/users-client": ["./node_modules/.prisma/users-client"],
+      "@prisma/notifications-client": ["./node_modules/.prisma/notifications-client"],
       "@prisma/orders-client": ["./node_modules/.prisma/orders-client"],
-      "@prisma/notifications-client": ["./node_modules/.prisma/notifications-client"]
-    }
+      "@prisma/users-client": ["./node_modules/.prisma/users-client"],
+      "@prisma/analytics-client": ["./node_modules/.prisma/analytics-client"],
+      "apps/*": ["./apps/*"]
+    },
+    "baseUrl": "./"
   }
 }

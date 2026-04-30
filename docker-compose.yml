@@ -1,5 +1,5 @@
 services:
-  # ── Databases (one per service) ──────────────────────────────────────────
+  # ── Databases ────────────────────────────────────────────────────────────
   users-db:
     image: postgres:15-alpine
     environment:
@@ -45,6 +45,21 @@ services:
       timeout: 5s
       retries: 5
 
+  analytics-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: analytics_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${ANALYTICS_DB_PASSWORD}
+    volumes:
+      - analytics-db-data:/var/lib/postgresql/data
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   pgadmin:
     image: dpage/pgadmin4
     environment:
@@ -56,14 +71,15 @@ services:
       - users-db
       - orders-db
       - notifications-db
+      - analytics-db
     networks: [internal]
 
   # ── Message Broker ───────────────────────────────────────────────────────
   rabbitmq:
     image: rabbitmq:3.12-management-alpine
     ports:
-      - '5672:5672'   # AMQP protocol — your services connect here
-      - '15672:15672' # Management UI — open in your browser
+      - '5672:5672'
+      - '15672:15672'
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
@@ -129,6 +145,22 @@ services:
         condition: service_healthy
     networks: [internal]
 
+  analytics:
+    build:
+      context: .
+      args:
+        APP_NAME: analytics
+    environment:
+      APP_NAME: analytics
+      DATABASE_URL: ${ANALYTICS_DATABASE_URL}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+    depends_on:
+      analytics-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks: [internal]
+
   api-gateway:
     build:
       context: .
@@ -148,6 +180,8 @@ services:
         condition: service_started
       notifications:
         condition: service_started
+      analytics:
+        condition: service_started
     networks: [internal]
 
 volumes:
@@ -155,6 +189,7 @@ volumes:
   users-db-data:
   orders-db-data:
   notifications-db-data:
+  analytics-db-data:
 
 networks:
   internal:

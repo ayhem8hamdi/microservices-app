@@ -9,16 +9,16 @@ export class OrdersService {
 constructor(
 private readonly prisma: PrismaService,
 @Inject('USERS_SERVICE') private usersClient: ClientProxy,
-@Inject('NOTIFICATIONS_SERVICE') private notifClient: ClientProxy,
+@Inject('EVENT_BUS') private eventBus: ClientProxy,
 ) {}
 async placeOrder(data: CreateOrderDto) {
 // 1. Validate user exists — cross-service call
-const user = await firstValueFrom(
-this.usersClient.send(PATTERNS.USERS.GET_ONE, { id: data.userId
-}).pipe(
-catchError(err => throwError(() => new RpcException(err)))
-)
-);
+    const user = await firstValueFrom(
+    this.usersClient.send(PATTERNS.USERS.GET_ONE, { id: data.userId
+        }).pipe(
+    catchError(err => throwError(() => new RpcException(err)))
+        )
+        );
 // 2. Persist order and its items in a Prisma transaction
 // If items fail to save, the order is rolled back automatically
 const order = await this.prisma.$transaction(async (tx) => {
@@ -40,16 +40,21 @@ include: { items: true },
 return created;
 });
 // 3. Emit event — non-blocking, runs after we already returned order
-const event: OrderPlacedEvent = {
-orderId: order.id,
-userId: user.id,
-userEmail: user.email,
-userName: user.name,
-total: order.total,
-};
-this.notifClient.emit(PATTERNS.EVENTS.ORDER_PLACED, event);
+  const event: OrderPlacedEvent = { 
+      orderId:   order.id, 
+      userId:    user.id, 
+      userEmail: user.email, 
+      userName:  user.name, 
+      total:     order.total, 
+    };
+
+    // Emit to the EXCHANGE with a routing key
+     // RabbitMQ routes this to every queue bound to orders.exchange with 'order.*' or '#'
+this.eventBus.emit(PATTERNS.EVENTS.ORDER_PLACED, event);
 return order;
 }
+
+
 async findOne(id: number) {
 const order = await this.prisma.order.findUnique({
 where: { id },
